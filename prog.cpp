@@ -21,7 +21,7 @@ int main() {
     getline(fileIn,stringIn); // got 1-st line
 
     while ( /*questionIn.number<2*/ stringIn!="end") { // while there are strings left // 2 - number of questions
-        if (stringIn[stringIn.length()-1] == '?' or stringIn[stringIn.length()-1] == ':') { // if found question text then type it out
+        if (stringIn[stringIn.length()-1] == '?' or stringIn[stringIn.length()-1] == ':' or stringIn[stringIn.length()-1] == '.') { // if found question text then type it out
             questionIn.number++;
             questionIn.name = stringIn;
             fileOut << "}" << endl;
