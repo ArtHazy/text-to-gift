@@ -40,10 +40,11 @@ void step1_clear_special_symbols(fstream &fIn, fstream &fStep1) {
     int stringCounter = 0; //!!!!!
     getline(fIn,sIn);
     stringCounter++;//!!!!!!
-    while (sIn[0]==' ') {sIn.erase(0,1);}// clear leading spaces
-    while (sIn[sIn.length()-1] == ' ') {sIn.pop_back();} // clear trailing spaces
-
+    
     while (sIn!="") {
+        while (sIn[0]==' ') {sIn.erase(0,1);}// clear leading spaces
+        while (sIn[sIn.length()-1] == ' ') {sIn.pop_back();} // clear trailing spaces
+
         specialSymbolsLocationsInStringContainer = findLocation(sIn,'~');
         while (specialSymbolsLocationsInStringContainer.size()!=0) {
             sIn.insert(specialSymbolsLocationsInStringContainer.back(),"\\");
