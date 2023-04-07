@@ -31,60 +31,25 @@ vector<int> findLocation(string sample, char findIt)
     return characterLocations;
 }
 
-void step1_clear_special_symbols(fstream &fIn, fstream &fStep1) {
-    string sIn="lol"; // string In
-    question qIn; // question in
-    int plCount = 0; // plus's counter
-    vector<int> specialSymbolsLocationsInStringContainer;
-    string answer;
-    int stringCounter = 0; //!!!!!
-    getline(fIn,sIn);
-    stringCounter++;//!!!!!!
-    
-    while (sIn!="") {
-        while (sIn[0]==' ') {sIn.erase(0,1);}// clear leading spaces
-        while (sIn[sIn.length()-1] == ' ') {sIn.pop_back();} // clear trailing spaces
+void clearSpecialSymbols(fstream& inFile, fstream& outFile) {
+    string line;
+    char specialChars[] = {'~', '=', '#', '{', '}', ':'};
 
-        specialSymbolsLocationsInStringContainer = findLocation(sIn,'~');
-        while (specialSymbolsLocationsInStringContainer.size()!=0) {
-            sIn.insert(specialSymbolsLocationsInStringContainer.back(),"\\");
-            specialSymbolsLocationsInStringContainer.pop_back();
+    while (getline(inFile, line)) {
+        for (char c : specialChars) {
+            vector<int> locations = findLocation(line, c);
+            while (!locations.empty()) {
+                line.insert(locations.back(), "\\");
+                locations.pop_back();
+            }
         }
-        specialSymbolsLocationsInStringContainer = findLocation(sIn,'=');
-        while (specialSymbolsLocationsInStringContainer.size()!=0) {
-            //cout << stringCounter <<" "<< specialSymbolsLocationsInStringContainer.back() << endl; // for debug
-            sIn.insert(specialSymbolsLocationsInStringContainer.back(),"\\");
-            specialSymbolsLocationsInStringContainer.pop_back();
-        }
-        specialSymbolsLocationsInStringContainer = findLocation(sIn,'#');
-        while (specialSymbolsLocationsInStringContainer.size()!=0) {
-            sIn.insert(specialSymbolsLocationsInStringContainer.back(),"\\");
-            specialSymbolsLocationsInStringContainer.pop_back();
-        }
-        specialSymbolsLocationsInStringContainer = findLocation(sIn,'{');
-        while (specialSymbolsLocationsInStringContainer.size()!=0) {
-            sIn.insert(specialSymbolsLocationsInStringContainer.back(),"\\");
-            specialSymbolsLocationsInStringContainer.pop_back();
-        }
-        specialSymbolsLocationsInStringContainer = findLocation(sIn,'}');
-        while (specialSymbolsLocationsInStringContainer.size()!=0) {
-            sIn.insert(specialSymbolsLocationsInStringContainer.back(),"\\");
-            specialSymbolsLocationsInStringContainer.pop_back();
-        }
-        specialSymbolsLocationsInStringContainer = findLocation(sIn,':');
-        while (specialSymbolsLocationsInStringContainer.size()!=0) {
-            sIn.insert(specialSymbolsLocationsInStringContainer.back(),"\\");
-            specialSymbolsLocationsInStringContainer.pop_back();
-        }
-        // MADNESS ENDS
-        
-        fStep1 << sIn << endl;
-        getline(fIn,sIn);
+        outFile << line << endl;
     }
     cout << "Step 1 is complete" << endl;
 }
 
-void step2_format_answers(fstream &fStep1, fstream &fOut) {
+
+void formatAnswers(fstream &fStep1, fstream &fOut) {
     int single_answer_questions_counter=0, multiple_answer_questions_counter=0;
 
     string sIn; // string in
@@ -158,9 +123,9 @@ int main() {
     fStep1.open("step1_clear_special_symbols.txt", std::ofstream::out | std::ofstream::trunc);
     fOut.open("giftOut.txt", std::ofstream::out | std::ofstream::trunc);
 
-    step1_clear_special_symbols(fIn,fStep1);
+    clearSpecialSymbols(fIn,fStep1);
     fStep1.close(); fStep1.open("step1_clear_special_symbols.txt"); // reopen
-    step2_format_answers(fStep1,fOut);
+    formatAnswers(fStep1,fOut);
 
     return 0;
 }
