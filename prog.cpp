@@ -12,7 +12,7 @@ struct question{
 };
 
 bool is_it_question(string sIn) {
-    if (sIn[sIn.length()-1] == '?' or sIn[sIn.length()-1] == ':' /*or sIn[sIn.length()-1] == '.'*/) { // if is question
+    if (sIn[sIn.length()-1] == '?' or sIn[sIn.length()-1] == ':') { // if is question
         return true;
     } else {
         return false;
@@ -20,7 +20,8 @@ bool is_it_question(string sIn) {
 
 }
 
-// stackoverflow // returns location indexes in string "sample" of chars "findIt"
+// from stackoverflow 
+// returns location indexes in string "sample" of chars "findIt"
 vector<int> findLocation(string sample, char findIt) 
 {
     vector<int> characterLocations;
@@ -31,6 +32,7 @@ vector<int> findLocation(string sample, char findIt)
     return characterLocations;
 }
 
+// reads input from a file, finds special characters of gift format in each line, neutralizes them, and inserts the output to another file. It calls the findLocation function to identify the locations of the special characters.
 void clearSpecialSymbols(fstream& inFile, fstream& outFile) {
     string line;
     char specialChars[] = {'~', '=', '#', '{', '}', ':'};
@@ -48,7 +50,7 @@ void clearSpecialSymbols(fstream& inFile, fstream& outFile) {
     cout << "Step 1 is complete" << endl;
 }
 
-
+// reads input from a file, formats the data, and writes the output to another file in a specific format. It calls the is_it_question function to identify the start of each question.
 void formatAnswers(fstream &fStep1, fstream &fOut) {
     int single_answer_questions_counter=0, multiple_answer_questions_counter=0;
 
