@@ -48,7 +48,7 @@ public class TextToGift_JE {
                     locations.remove(locations.size() - 1);
                 }
             }
-            outFile.write(line + "\n");
+            outFile.write(line.trim() + "\n");
         }
         
         System.out.println("Special symbols were cleared");
@@ -149,9 +149,6 @@ public class TextToGift_JE {
         BufferedWriter fOutStep2 = new BufferedWriter(new FileWriter("~giftOut.txt"));
 
         formGift(fInStep2, fOutStep2);
-        
-        fOutStep2.newLine();
-        fOutStep2.write("lol");
 
         fInStep2.close();
         fOutStep2.close();
