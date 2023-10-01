@@ -17,25 +17,16 @@ class Question {
 
 public class TextToGift_JE {
     
-    static boolean IsQuestion(String sIn) {
-        if (sIn!=null){
-            if (!sIn.equals("")) {
-                return sIn.charAt(sIn.length() - 1) == '?' || sIn.charAt(sIn.length() - 1) == ':';
-            }
-        }
-        return false;
-        
+    static boolean isQuestion(String sIn) {
+        return sIn != null && !sIn.isEmpty() && (sIn.endsWith("?") || sIn.endsWith(":"));
     }
 
     static boolean isWriteDownQuestion(String sIn) {
-        if (IsQuestion(sIn)){
-            if (sIn.charAt(0)=='+'){return true;}
-        }
-        return false;
+        return isQuestion(sIn) && sIn.startsWith("+");
     }
 
     static boolean isChoiceQuestion(String sIn) {
-        return !isWriteDownQuestion(sIn);
+        return isQuestion(sIn) && !sIn.startsWith("+");
     }
 
     static void handleWriteDownQuestion(ArrayList<String> variants, BufferedWriter fOut) throws IOException{
@@ -107,7 +98,7 @@ public class TextToGift_JE {
                         locations.remove(locations.size() - 1);
                     }
                 }
-                if ((line.length()!=0) && (line.charAt(line.length()-1)==';' || (line.charAt(line.length()-1)==',') || (line.charAt(line.length()-1)=='.'))){
+                if ((line.length()!=0) && (",;.".indexOf(line.charAt(line.length()-1)) != -1)){
                     try {
                         line = line.substring(0, line.length()-1);
                     } catch (Exception e) {
@@ -146,7 +137,7 @@ public class TextToGift_JE {
 
         while (sIn != null && sIn!=null && !sIn.equals("")) {
 
-            while (IsQuestion(sIn)) {
+            while (isQuestion(sIn)) {
 
                 if (isWriteDownQuestion(sIn)){
                     bufQuestion.isWriteDownQuestion=true;
@@ -165,7 +156,7 @@ public class TextToGift_JE {
 
                 sIn = fIn.readLine();
 
-                while (sIn != null && !IsQuestion(sIn) && sIn!=null && !sIn.equals("")) {
+                while (sIn != null && !isQuestion(sIn) && sIn!=null && !sIn.equals("")) {
                     if (sIn.charAt(0) == '+') {
                         correctVariants++;
                     }
