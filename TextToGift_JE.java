@@ -6,11 +6,18 @@ import java.util.ArrayList;
 
 class Question {
     int number;
-    String name;
+    String text;
     boolean isWriteDownQuestion;
+    ArrayList<String>variants;
+    int correctVariantsCounter;
+
+    // ArrayList<String>correctVariants;
+    // ArrayList<String>wrongVariants;
 
     Question() {
         this.number = 0;
+        this.correctVariantsCounter=0;
+        this.variants=new ArrayList<>();
     }
 }
 
@@ -52,7 +59,7 @@ public class TextToGift_JE {
         }
     }
 
-    static void handleMultipleChoiseQuestion(ArrayList<String> variants, int correctVariants, BufferedWriter fOut) throws IOException{
+    static void handleMultipleChoiseQuestion(ArrayList<String> variants, int correctVariantsCounter, BufferedWriter fOut) throws IOException{
         int variantsOverall = variants.size();
         while (!variants.isEmpty()) {
             String bufString = variants.get(variants.size() - 1);
@@ -63,10 +70,10 @@ public class TextToGift_JE {
 
             if (bufString.charAt(0) == '+') {
                 bufString = bufString.substring(1);
-                points = (double)100/correctVariants;
+                points = (double)100/correctVariantsCounter;
                 fOut.write("~" + "%" + pointsFormat.format(points) + "%" + bufString.trim() + "\n");
             } else {
-                points = (100 / ((double) variantsOverall - (double) correctVariants));
+                points = (100 / ((double) variantsOverall - (double) correctVariantsCounter));
                 fOut.write("~" + "%" + "-" + pointsFormat.format(points) + "%" + bufString.trim() + "\n");
             }
         }
@@ -98,7 +105,8 @@ public class TextToGift_JE {
                         locations.remove(locations.size() - 1);
                     }
                 }
-                if ((line.length()!=0) && (",;.".indexOf(line.charAt(line.length()-1)) != -1)){
+                //remove string endings like , ; .
+                if ((line.length()!=0) && (",;.".indexOf(line.charAt(line.length()-1)) != -1)){ 
                     try {
                         line = line.substring(0, line.length()-1);
                     } catch (Exception e) {
@@ -131,66 +139,68 @@ public class TextToGift_JE {
 
         String sIn;
         sIn = fIn.readLine();
+        int questionCounter=0;
 
-        Question bufQuestion = new Question();
-        
+        while (sIn!=null) { // && !sIn.equals("")
+            if (sIn.equals("")){fOut.write("\n"); sIn=fIn.readLine();} // if empty
+            else {
+                if (isQuestion(sIn)) {
+                    Question bufQuestion = new Question();
+                    bufQuestion.text = sIn;
+                    questionCounter++;
+                    bufQuestion.number=questionCounter;
 
-        while (sIn != null && sIn!=null && !sIn.equals("")) {
-
-            while (isQuestion(sIn)) {
-
-                if (isWriteDownQuestion(sIn)){
-                    bufQuestion.isWriteDownQuestion=true;
-                    sIn = sIn.substring(1);
-                } else {
-                    bufQuestion.isWriteDownQuestion=false;
-                }
-
-                bufQuestion.name = sIn;
-                bufQuestion.number++;
-
-                fOut.write("::Вопрос " + bufQuestion.number + "::" + bufQuestion.name + "{" + "\n");
-
-                ArrayList<String> variants = new ArrayList<>();
-                int correctVariants = 0;
-
-                sIn = fIn.readLine();
-
-                while (sIn != null && !isQuestion(sIn) && sIn!=null && !sIn.equals("")) {
-                    if (sIn.charAt(0) == '+') {
-                        correctVariants++;
+                    if (isWriteDownQuestion(sIn)){
+                        bufQuestion.isWriteDownQuestion=true;
+                        sIn = sIn.substring(1);
+                    } else {
+                        bufQuestion.isWriteDownQuestion=false;
                     }
-                    variants.add(sIn);
+
+                    fOut.write("::Вопрос " + bufQuestion.number + "::" + bufQuestion.text + "{" + "\n");
+
+                    
 
                     sIn = fIn.readLine();
+
+                    while (sIn != null && !isQuestion(sIn) && sIn!=null && !sIn.equals("")) {
+                        if (sIn.charAt(0) == '+') {
+                            bufQuestion.correctVariantsCounter++;
+                        }
+                        bufQuestion.variants.add(sIn);
+
+                        sIn = fIn.readLine();
+                    }
+
+                    if (bufQuestion.isWriteDownQuestion){
+                        writeDownCount++;
+                        handleWriteDownQuestion(bufQuestion.variants,fOut);
+                    }
+                    if (!(bufQuestion.isWriteDownQuestion)){
+                        switch (bufQuestion.correctVariantsCounter) {
+                        case 0:
+                            System.out.println("Question " + bufQuestion.number + " has no correct answers!");
+                            break;
+
+                        case 1:
+                            singleChoiceCount++;
+                            handleSingleChoiseQuestion(bufQuestion.variants,fOut);
+                            break;
+                        default:
+                            multipleChoicesCount++;
+                            handleMultipleChoiseQuestion(bufQuestion.variants,bufQuestion.correctVariantsCounter,fOut);
+                        }
+                    }
+
+                    fOut.write("}" + "\n" + "\n");
                 }
 
-                if (bufQuestion.isWriteDownQuestion){
-                    writeDownCount++;
-                    handleWriteDownQuestion(variants,fOut);
-                }
-                if (!(bufQuestion.isWriteDownQuestion)){
-                    switch (correctVariants) {
-                    case 0:
-                        System.out.println("Question " + bufQuestion.number + " has no correct answers!");
-                        break;
-
-                    case 1:
-                        singleChoiceCount++;
-                        handleSingleChoiseQuestion(variants,fOut);
-                        break;
-                    default:
-                        multipleChoicesCount++;
-                        handleMultipleChoiseQuestion(variants,correctVariants,fOut);
-                }
-                }
-
-                fOut.write("}" + "\n" + "\n");
             }
+            
         }
 
         System.out.println("Gift was formated");
-        System.out.println("Questions found overall: " + bufQuestion.number);
+        System.out.println("Questions found overall: " + (singleChoiceCount+multipleChoicesCount+writeDownCount));
         System.out.println("1-answer questions found: " + singleChoiceCount);
         System.out.println("mult-answer questions found: " + multipleChoicesCount);
         System.out.println("Write down question found: " + writeDownCount);
