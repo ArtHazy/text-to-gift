@@ -101,7 +101,10 @@ public class TextToGift_JE {
                     ArrayList<Integer> locations = findLocation(line, c);
                     while (!locations.isEmpty()) {
                         int index = locations.get(locations.size() - 1);
-                        line = line.substring(0, index) + "\\" + line.substring(index);
+                        //char lol = line.charAt(index);
+                        if (line.charAt(index-1)!='\\'){
+                            line = line.substring(0, index) + "\\" + line.substring(index);
+                        }
                         locations.remove(locations.size() - 1);
                     }
                 }
@@ -142,7 +145,7 @@ public class TextToGift_JE {
         int questionCounter=0;
 
         while (sIn!=null) { // && !sIn.equals("")
-            if (sIn.equals("")){fOut.write("\n"); sIn=fIn.readLine();} // if empty
+            if (sIn.equals("")){ sIn=fIn.readLine();} // if empty
             else {
                 if (isQuestion(sIn)) {
                     Question bufQuestion = new Question();
