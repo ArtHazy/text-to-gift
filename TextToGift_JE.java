@@ -36,48 +36,48 @@ public class TextToGift_JE {
         return isQuestion(sIn) && !sIn.startsWith("+");
     }
 
-    static void handleWriteDownQuestion(ArrayList<String> variants, BufferedWriter fOut) throws IOException{
+    static void handleWriteDownQuestion(ArrayList<String> variants, StringBuilder fOut) {
         while (!variants.isEmpty()) {
-            String bufString = variants.get(variants.size() - 1);
-            variants.remove(variants.size() - 1);
-            if (bufString.charAt(0)=='+'){bufString=bufString.substring(1);}
-            fOut.write("=" + bufString.trim() + "\n");
-        }
-    }
-
-    static void handleSingleChoiseQuestion(ArrayList<String> variants, BufferedWriter fOut) throws IOException{
-        while (!variants.isEmpty()) {
-            String bufString = variants.get(variants.size() - 1);
-            variants.remove(variants.size() - 1);
-
+            String bufString = variants.remove(variants.size() - 1);
             if (bufString.charAt(0) == '+') {
                 bufString = bufString.substring(1);
-                fOut.write("=" + bufString.trim() + "\n");
+            }
+            fOut.append("=").append(bufString.trim()).append("\n");
+        }
+    }
+    
+    static void handleSingleChoiseQuestion(ArrayList<String> variants, StringBuilder fOut) {
+        while (!variants.isEmpty()) {
+            String bufString = variants.remove(variants.size() - 1);
+    
+            if (bufString.charAt(0) == '+') {
+                bufString = bufString.substring(1);
+                fOut.append("=").append(bufString.trim()).append("\n");
             } else {
-                 fOut.write("~" + bufString.trim() + "\n");
+                fOut.append("~").append(bufString.trim()).append("\n");
             }
         }
     }
-
-    static void handleMultipleChoiseQuestion(ArrayList<String> variants, int correctVariantsCounter, BufferedWriter fOut) throws IOException{
+    
+    static void handleMultipleChoiseQuestion(ArrayList<String> variants, int correctVariantsCounter, StringBuilder fOut) {
         int variantsOverall = variants.size();
         while (!variants.isEmpty()) {
-            String bufString = variants.get(variants.size() - 1);
-            variants.remove(variants.size() - 1);
-
-            double points = 0;
+            String bufString = variants.remove(variants.size() - 1);
+    
+            double points;
             DecimalFormat pointsFormat = new DecimalFormat("0.###");
-
+    
             if (bufString.charAt(0) == '+') {
                 bufString = bufString.substring(1);
-                points = (double)100/correctVariantsCounter;
-                fOut.write("~" + "%" + pointsFormat.format(points) + "%" + bufString.trim() + "\n");
+                points = (double) 100 / correctVariantsCounter;
+                fOut.append("~").append("%").append(pointsFormat.format(points)).append("%").append(bufString.trim()).append("\n");
             } else {
                 points = (100 / ((double) variantsOverall - (double) correctVariantsCounter));
-                fOut.write("~" + "%" + "-" + pointsFormat.format(points) + "%" + bufString.trim() + "\n");
+                fOut.append("~").append("%").append("-").append(pointsFormat.format(points)).append("%").append(bufString.trim()).append("\n");
             }
         }
     }
+    
 
     static ArrayList<Integer> findLocation(String sample, char findIt) {
         ArrayList<Integer> characterLocations = new ArrayList<>();
@@ -89,40 +89,38 @@ public class TextToGift_JE {
         return characterLocations;
     }
 
-    static void clearSpecialSymbols(BufferedReader inFile, BufferedWriter outFile) throws IOException {
-        String line;
+    static void clearSpecialSymbols(String fInStep1, StringBuilder fOutStep1) {
+        String[] lines = fInStep1.split("\n");
         char[] specialChars = {'~', '=', '#', '{', '}', ':'};
-
-        while ((line = inFile.readLine()) != null) {
+    
+        for (String line : lines) {
             line = line.trim();
-            if (!(line.length()>=2 && line.substring(0, 2).equals("//"))){
+            if (!(line.length() >= 2 && line.substring(0, 2).equals("//"))) {
                 line = removeBulletedLists(line);
                 for (char c : specialChars) {
                     ArrayList<Integer> locations = findLocation(line, c);
                     while (!locations.isEmpty()) {
                         int index = locations.get(locations.size() - 1);
-                        //char lol = line.charAt(index);
-                        if (line.charAt(index-1)!='\\'){
+                        if (line.charAt(index - 1) != '\\') {
                             line = line.substring(0, index) + "\\" + line.substring(index);
                         }
                         locations.remove(locations.size() - 1);
                     }
                 }
-                //remove string endings like , ; .
-                if ((line.length()!=0) && (",;.".indexOf(line.charAt(line.length()-1)) != -1)){ 
+                if ((line.length() != 0) && (",;.".indexOf(line.charAt(line.length() - 1)) != -1)) {
                     try {
-                        line = line.substring(0, line.length()-1);
+                        line = line.substring(0, line.length() - 1);
                     } catch (Exception e) {
-                        // TODO: handle exception
+                        // Handle exception
                     }
                 }
-                outFile.write(line.trim() + "\n");
+                fOutStep1.append(line.trim()).append("\n");
             }
-            
         }
-        
+    
         System.out.println("Special symbols were cleared");
     }
+    
 
     static String removeBulletedLists(String mystring) {
         try {
@@ -137,92 +135,113 @@ public class TextToGift_JE {
         
     }
 
-    static void formGift(BufferedReader fIn, BufferedWriter fOut) throws IOException {
-        int singleChoiceCount=0, multipleChoicesCount=0, writeDownCount=0;
-
-        String sIn;
-        sIn = fIn.readLine();
-        int questionCounter=0;
-
-        while (sIn!=null) { // && !sIn.equals("")
-            if (sIn.equals("")){ sIn=fIn.readLine();} // if empty
-            else {
-                if (isQuestion(sIn)) {
-                    Question bufQuestion = new Question();
-                    bufQuestion.text = sIn;
-                    questionCounter++;
-                    bufQuestion.number=questionCounter;
-
-                    if (isWriteDownQuestion(sIn)){
-                        bufQuestion.isWriteDownQuestion=true;
-                        sIn = sIn.substring(1);
-                    } else {
-                        bufQuestion.isWriteDownQuestion=false;
+    static void formGift(String fInStep2, StringBuilder fOutStep2) {
+        int singleChoiceCount = 0, multipleChoicesCount = 0, writeDownCount = 0;
+    
+        String[] lines = fInStep2.split("\n");
+        int questionCounter = 0;
+    
+        for (String sIn : lines) {
+            if (sIn.equals("")) continue; // Skip empty lines
+    
+            if (isQuestion(sIn)) {
+                Question bufQuestion = new Question();
+                bufQuestion.text = sIn;
+                questionCounter++;
+                bufQuestion.number = questionCounter;
+    
+                if (isWriteDownQuestion(sIn)){
+                    bufQuestion.isWriteDownQuestion = true;
+                    sIn = sIn.substring(1);
+                } else {
+                    bufQuestion.isWriteDownQuestion = false;
+                }
+    
+                fOutStep2.append("::Вопрос ").append(bufQuestion.number).append("::").append(bufQuestion.text).append("{").append("\n");
+    
+                int currentIndex = 0;
+    
+                while (currentIndex < lines.length && !isQuestion(lines[currentIndex]) && !lines[currentIndex].equals("")) {
+                    String currentLine = lines[currentIndex];
+                    if (currentLine.charAt(0) == '+') {
+                        bufQuestion.correctVariantsCounter++;
                     }
-
-                    fOut.write("::Вопрос " + bufQuestion.number + "::" + bufQuestion.text + "{" + "\n");
-
-                    
-
-                    sIn = fIn.readLine();
-
-                    while (sIn != null && !isQuestion(sIn) && sIn!=null && !sIn.equals("")) {
-                        if (sIn.charAt(0) == '+') {
-                            bufQuestion.correctVariantsCounter++;
-                        }
-                        bufQuestion.variants.add(sIn);
-
-                        sIn = fIn.readLine();
-                    }
-
-                    if (bufQuestion.isWriteDownQuestion){
-                        writeDownCount++;
-                        handleWriteDownQuestion(bufQuestion.variants,fOut);
-                    }
-                    if (!(bufQuestion.isWriteDownQuestion)){
-                        switch (bufQuestion.correctVariantsCounter) {
+                    bufQuestion.variants.add(currentLine);
+    
+                    currentIndex++;
+                }
+    
+                if (bufQuestion.isWriteDownQuestion){
+                    writeDownCount++;
+                    handleWriteDownQuestion(bufQuestion.variants, fOutStep2);
+                }
+                if (!bufQuestion.isWriteDownQuestion){
+                    switch (bufQuestion.correctVariantsCounter) {
                         case 0:
                             System.out.println("Question " + bufQuestion.number + " has no correct answers!");
                             break;
-
+    
                         case 1:
                             singleChoiceCount++;
-                            handleSingleChoiseQuestion(bufQuestion.variants,fOut);
+                            handleSingleChoiseQuestion(bufQuestion.variants, fOutStep2);
                             break;
                         default:
                             multipleChoicesCount++;
-                            handleMultipleChoiseQuestion(bufQuestion.variants,bufQuestion.correctVariantsCounter,fOut);
-                        }
+                            handleMultipleChoiseQuestion(bufQuestion.variants, bufQuestion.correctVariantsCounter, fOutStep2);
                     }
-
-                    fOut.write("}" + "\n" + "\n");
                 }
-
+    
+                fOutStep2.append("}").append("\n").append("\n");
             }
-            
         }
-
-        System.out.println("Gift was formated");
-        System.out.println("Questions found overall: " + (singleChoiceCount+multipleChoicesCount+writeDownCount));
+    
+        System.out.println("Gift was formatted");
+        System.out.println("Questions found overall: " + (singleChoiceCount + multipleChoicesCount + writeDownCount));
         System.out.println("1-answer questions found: " + singleChoiceCount);
         System.out.println("mult-answer questions found: " + multipleChoicesCount);
         System.out.println("Write down question found: " + writeDownCount);
     }
+    
 
     public static void main(String[] args) throws IOException {
-        BufferedReader fInStep1 = new BufferedReader(new FileReader("~textIn.txt"));
-        BufferedWriter fOutStep1 = new BufferedWriter(new FileWriter("buf.txt"));
+        // Simulate reading from a string
+        String inputString = "Всеобщий эквивалент, выступающий измерителем стоимости товаров или услуг, легко на них обменивающийся\\\\:\r\n" + //
+                "+деньги\r\n" + //
+                "ценные бумаги\r\n" + //
+                "золото\r\n" + //
+                "иностранная валюта\r\n" + //
+                "страховые полисы\r\n" + //
+                "Деньги, эмитируемые Банком России, имеющие материально-вещественную форму\\\\:\r\n" + //
+                "+наличные\r\n" + //
+                "безналичные\r\n" + //
+                "акции\r\n" + //
+                "облигации\r\n" + //
+                "векселя\r\n" + //
+                "Деньги, представляющие собой запись о том, что физическому или юридическому лицу принадлежат финансовые ресурсы\\\\:\r\n" + //
+                "наличные\r\n" + //
+                "+безналичные\r\n" + //
+                "акции\r\n" + //
+                "облигации\r\n" + //
+                "векселя"; // Replace with your actual input string
 
+        String fInStep1 = inputString;
+        StringBuilder fOutStep1 = new StringBuilder();
+
+        // Call clearSpecialSymbols method
         clearSpecialSymbols(fInStep1, fOutStep1);
-        fInStep1.close();
-        fOutStep1.close();
 
-        BufferedReader fInStep2 = new BufferedReader(new FileReader("buf.txt"));
-        BufferedWriter fOutStep2 = new BufferedWriter(new FileWriter("~giftOut.txt"));
+        String resultString = fOutStep1.toString(); // Save the result to a string
 
+        // Simulate reading from a string
+        String fInStep2 = resultString;
+        StringBuilder fOutStep2 = new StringBuilder();
+
+        // Call formGift method
         formGift(fInStep2, fOutStep2);
 
-        fInStep2.close();
-        fOutStep2.close();
+        String finalResultString = fOutStep2.toString(); // Save the final result to a string
+
+        // Now you have the final result in the 'finalResultString' variable
+        System.out.println(finalResultString);
     }
 }
