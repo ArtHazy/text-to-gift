@@ -105,7 +105,7 @@ public class TextToGift_JE {
                         // TODO: handle exception
                     }
                 }
-                outFile.write(line + "\n");
+                outFile.write(line.trim() + "\n");
             }
             
         }
@@ -116,8 +116,8 @@ public class TextToGift_JE {
     static String removeBulletedLists(String mystring) {
         try {
             String substring = mystring.substring(0, 3);
-            if (substring.charAt(1) == ')' && substring.charAt(2) == ' ') {
-                return mystring.substring(3);
+            if (substring.charAt(1) == ')') {
+                return mystring.substring(2);
             }
         } catch (Exception e) {
             // TODO: handle exception
