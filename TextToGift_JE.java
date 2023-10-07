@@ -170,11 +170,11 @@ public class TextToGift_JE {
                 bufQuestion.number = questionCounter;
 
 
-                while (linesIn.size()!=0 && !isQuestion(linesIn.get(0))) {
+                while (linesIn.size()!=0 && !linesIn.get(0).equals("") && !isQuestion(linesIn.get(0))) {
                     line=linesIn.get(0);
                     linesIn.remove(0);
 
-                    if (line.length()!=0 && line.charAt(0)=='+'){bufQuestion.correctVariantsCounter++;}
+                    if (line.charAt(0)=='+'){bufQuestion.correctVariantsCounter++;}
                     bufQuestion.variants.add(line);
 
                 }
