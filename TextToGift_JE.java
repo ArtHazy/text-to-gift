@@ -203,28 +203,11 @@ public class TextToGift_JE {
     }
     
 
-    public static void main(String[] args) throws IOException {
+    public static String main(String textIn) throws IOException {
         // Simulate reading from a string
-        String inputString = "Всеобщий эквивалент, выступающий измерителем стоимости товаров или услуг, легко на них обменивающийся\\\\:\r\n" + //
-                "+деньги\r\n" + //
-                "ценные бумаги\r\n" + //
-                "золото\r\n" + //
-                "иностранная валюта\r\n" + //
-                "страховые полисы\r\n" + //
-                "Деньги, эмитируемые Банком России, имеющие материально-вещественную форму\\\\:\r\n" + //
-                "+наличные\r\n" + //
-                "безналичные\r\n" + //
-                "акции\r\n" + //
-                "облигации\r\n" + //
-                "векселя\r\n" + //
-                "Деньги, представляющие собой запись о том, что физическому или юридическому лицу принадлежат финансовые ресурсы\\\\:\r\n" + //
-                "наличные\r\n" + //
-                "+безналичные\r\n" + //
-                "акции\r\n" + //
-                "облигации\r\n" + //
-                "векселя"; // Replace with your actual input string
+        
 
-        String fInStep1 = inputString;
+        String fInStep1 = textIn;
         StringBuilder fOutStep1 = new StringBuilder();
 
         // Call clearSpecialSymbols method
@@ -242,6 +225,6 @@ public class TextToGift_JE {
         String finalResultString = fOutStep2.toString(); // Save the final result to a string
 
         // Now you have the final result in the 'finalResultString' variable
-        System.out.println(finalResultString);
+        return(finalResultString);
     }
 }
