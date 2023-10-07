@@ -174,7 +174,7 @@ public class TextToGift_JE {
                     line=linesIn.get(0);
                     linesIn.remove(0);
 
-                    if (line.charAt(0)=='+'){bufQuestion.correctVariantsCounter++;}
+                    if (line.length()!=0 && line.charAt(0)=='+'){bufQuestion.correctVariantsCounter++;}
                     bufQuestion.variants.add(line);
 
                 }
