@@ -3,8 +3,8 @@ import java.io.IOException;
 public class runner {
     public static void main(String[] args) throws IOException {
         System.out.println(TextToGift_JE.main("Всеобщий эквивалент, выступающий измерителем стоимости товаров или услуг, легко на них обменивающийся\\\\:\n" + //
-                "+деньги\n" + //
-                "\n" +
+        "\n" +        
+        "+деньги\n" + //
                 "ценные бумаги\n" + //
                 "золото\n" + //
                 "иностранная валюта\n" + //

@@ -1,10 +1,12 @@
+package com.example.fastgift;
+
+import android.content.Context;
+import android.widget.Toast;
+
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-
-
 class Question {
     int number;
     String text;
@@ -25,7 +27,7 @@ class Question {
 
 
 public class TextToGift_JE {
-    
+
     static boolean isQuestion(String sIn) {
         return sIn != null && !sIn.isEmpty() && (sIn.endsWith("?") || sIn.endsWith(":"));
     }
@@ -49,12 +51,12 @@ public class TextToGift_JE {
         }
         return sOut;
     }
-    
+
     static ArrayList<String> handleSingleChoiseQuestion(ArrayList<String> variants) {
         ArrayList<String> sOut=new ArrayList<>();
         while (!variants.isEmpty()) {
             String bufString = variants.remove(variants.size() - 1);
-    
+
             if (bufString.charAt(0) == '+') {
                 bufString = bufString.substring(1);
                 sOut.add("="+bufString.trim());
@@ -64,17 +66,17 @@ public class TextToGift_JE {
         }
         return sOut;
     }
-    
+
     static ArrayList<String> handleMultipleChoiseQuestion(ArrayList<String> variants, int correctVariantsCounter) {
         ArrayList<String> sOut=new ArrayList<>();
 
         int variantsOverall = variants.size();
         while (!variants.isEmpty()) {
             String bufString = variants.remove(variants.size() - 1);
-    
+
             double points;
             DecimalFormat pointsFormat = new DecimalFormat("0.###");
-    
+
             if (bufString.charAt(0) == '+') {
                 bufString = bufString.substring(1);
                 points = (double) 100 / correctVariantsCounter;
@@ -86,7 +88,7 @@ public class TextToGift_JE {
         }
         return sOut;
     }
-    
+
 
     static ArrayList<Integer> findLocation(String sample, char findIt) {
         ArrayList<Integer> characterLocations = new ArrayList<>();
@@ -98,43 +100,40 @@ public class TextToGift_JE {
         return characterLocations;
     }
 
-    static ArrayList<String> clearSpecialSymbols(String[] linesIn) {
+    static ArrayList<String> cleanUp(String[] linesIn) {
         ArrayList<String>sOut=new ArrayList<>();
         char[] specialChars = {'~', '=', '#', '{', '}', ':'};
-    
+
         for (String line : linesIn) {
             line = line.trim();
-            if (!(line.length() >= 2 && line.substring(0, 2).equals("//"))) {
-                line = removeBulletedLists(line);
-                for (char c : specialChars) {
-                    ArrayList<Integer> locations = findLocation(line, c);
-                    while (!locations.isEmpty()) {
-                        int index = locations.get(locations.size() - 1);
-                        if (line.charAt(index - 1) != '\\') {
-                            line = line.substring(0, index) + "\\" + line.substring(index);
+            if (!(line.length() >= 2 && line.substring(0, 2).equals("//"))) { // ignore if starts with //
+                if (line.length()!=0) { // if line isn't empty
+                    line = removeBulletedLists(line);
+                    for (char c : specialChars) {
+                        ArrayList<Integer> locations = findLocation(line, c);
+                        while (!locations.isEmpty()) {
+                            int index = locations.get(locations.size() - 1);
+                            if (line.charAt(index - 1) != '\\') {
+                                line = line.substring(0, index) + "\\" + line.substring(index);
+                            }
+                            locations.remove(locations.size() - 1);
                         }
-                        locations.remove(locations.size() - 1);
                     }
-                }
-                if ((line.length() != 0) && (",;.".indexOf(line.charAt(line.length() - 1)) != -1)) {
-                    try {
-                        line = line.substring(0, line.length() - 1);
-                    } catch (Exception e) {
-                        // Handle exception
+                    if (",;.".indexOf(line.charAt(line.length() - 1)) != -1) {
+                        try {
+                            line = line.substring(0, line.length() - 1);
+                        } catch (Exception e) {
+                            // Handle exception
+                        }
                     }
+                    sOut.add(line.trim());
                 }
-                sOut.add(line.trim());
             }
         }
-
-        // String[]linesOut=new String[sOut.size()];
-        // linesOut=sOut.toArray(linesOut);
-
-    
         System.out.println("Special symbols were cleared");
         return sOut;
     }
-    
+
 
     static String removeBulletedLists(String mystring) {
         try {
@@ -146,19 +145,23 @@ public class TextToGift_JE {
             // TODO: handle exception
         }
         return mystring;
-        
+
     }
 
-    static ArrayList<String> formGift(ArrayList<String> linesIn) {
+
+
+    static ArrayList<String> formGift(String[] lines) {
+        ArrayList<String>linesIn=cleanUp(lines);
         ArrayList<String>sOut=new ArrayList<>();
+
         int singleChoiceCount = 0, multipleChoicesCount = 0, writeDownCount = 0, questionCounter = 0;
-    
+
         while (linesIn.size()!=0){
             String line=linesIn.get(0);
             linesIn.remove(0);
 
             if (line.equals("")) {continue;}; // Skip empty lines
-            
+
 
             if (isQuestion(line)) {
                 Question bufQuestion = new Question();
@@ -178,10 +181,9 @@ public class TextToGift_JE {
                     bufQuestion.variants.add(line);
 
                 }
-    
 
                 sOut.add("::Вопрос "+bufQuestion.number+"::"+bufQuestion.text+"{");
-    
+
                 if (bufQuestion.isWriteDownQuestion){
                     writeDownCount++;
                     sOut.addAll(handleWriteDownQuestion(bufQuestion.variants));
@@ -191,7 +193,7 @@ public class TextToGift_JE {
                         case 0:
                             System.out.println("Question " + bufQuestion.number + " has no correct answers!");
                             break;
-    
+
                         case 1:
                             singleChoiceCount++;
                             sOut.addAll(handleSingleChoiseQuestion(bufQuestion.variants));
@@ -201,40 +203,28 @@ public class TextToGift_JE {
                             sOut.addAll(handleMultipleChoiseQuestion(bufQuestion.variants,bufQuestion.correctVariantsCounter));
                     }
                 }
-    
+
                 sOut.add("}\n");
             }
         }
-    
-        System.out.println("Gift was formatted");
-        System.out.println("Questions found overall: " + (singleChoiceCount + multipleChoicesCount + writeDownCount));
-        System.out.println("1-answer questions found: " + singleChoiceCount);
-        System.out.println("mult-answer questions found: " + multipleChoicesCount);
-        System.out.println("Write down question found: " + writeDownCount);
+
+
         return sOut;
     }
-    
+
 
     public static String main(String textIn) throws IOException {
-        // Simulate reading from a string
+
         String[] textInStrings = textIn.split("\n");
-        
-        // Call clearSpecialSymbols method
-        ArrayList<String> fOutStep1=clearSpecialSymbols(textInStrings);
 
-        // Simulate reading from a string
-        ArrayList<String> fInStep2 = fOutStep1;
-        ArrayList<String> fOutStep2 = formGift(fInStep2);
-
-        // Call formGift method
+        ArrayList<String> gift = formGift(textInStrings);
 
         String finalResultString="";
-        for (String string : fOutStep2) {
+        for (String string : gift) {
             finalResultString+=string+"\n";
         }
 
 
-        // Now you have the final result in the 'finalResultString' variable
         return(finalResultString);
     }
 }
