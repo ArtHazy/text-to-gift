@@ -1,7 +1,7 @@
-package com.example.fastgift;
+// package com.example.fastgift;
 
-import android.content.Context;
-import android.widget.Toast;
+// import android.content.Context;
+// import android.widget.Toast;
 
 import java.io.*;
 import java.text.DecimalFormat;
